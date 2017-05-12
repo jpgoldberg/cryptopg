@@ -1,26 +1,62 @@
 package main
 
 import (
-	"crypto/rand"
+	"bytes"
+	"crypto/aes"
+	"crypto/cipher"
 	"crypto/sha256"
 	"encoding/hex"
 	"errors"
 	"fmt"
-
 	"hash"
 
 	"golang.org/x/crypto/pbkdf2"
 )
 
-type Challange struct {
+// Challenge has details for each PBKDF2 challenges
+type Challenge struct {
 	Rounds, KeyLen     int
 	Salt, Dk           []byte
 	PrfName, Pwd, Hint string
 	prf                func() hash.Hash
 }
 
-// String prints the Challange without the password
-func (c Challange) String() string {
+// TestVector is for challenges with Expected values
+type TestVector struct {
+	Challenge
+	Expected string
+}
+
+// Pass checks of Dk is Expected
+func (t TestVector) Pass() bool {
+	if t.Dk == nil {
+		t.DeriveKey()
+	}
+	e, _ := hex.DecodeString(t.Expected)
+	if bytes.Compare(t.Dk, e) == 0 {
+		return true
+	}
+	return false
+}
+
+var v1 = TestVector{
+	Challenge: Challenge{
+		Rounds:  4096,
+		KeyLen:  40,
+		Salt:    []byte("saltSALTsaltSALTsaltSALTsaltSALTsalt"),
+		PrfName: "HMAC-SHA256",
+		Pwd:     "passwordPASSWORDpassword",
+		Hint:    "http://stackoverflow.com/a/5136918/1304076",
+		prf:     sha256.New,
+		Dk:      nil,
+	},
+	// 348c89dbcbd32b2f32d814b8116e84cf2b17347ebc1800181c4e2a1fb8dd53e1c635518c7dac47e9
+	// From http://stackoverflow.com/a/5136918/1304076
+	Expected: "348c89dbcbd32b2f32d814b8116e84cf2b17347ebc1800181c4e2a1fb8dd53e1c635518c7dac47e9",
+}
+
+// String prints the Challenge without the password
+func (c Challenge) String() string {
 	if c.PrfName == "" {
 		return ""
 	}
@@ -38,11 +74,20 @@ func (c Challange) String() string {
 	return r
 }
 
-// DeriveKey calculates the key using PBKDF2
-func (c *Challange) DeriveKey() ([]byte, error) {
-	if c.KeyLen == 0 {
-		c.KeyLen = 32
-	}
+// String for test vector challenge
+func (t TestVector) String() string {
+	r := fmt.Sprintf("Passwd:\t\"%s\"\n", t.Pwd)
+	r += t.Challenge.String()
+	r += fmt.Sprintf("Expected:\t%s\n", t.Expected)
+	r += fmt.Sprintf("Passes?\t%v\n", t.Pass())
+
+	return r
+}
+
+// DeriveKeyWithLength calculates the key of size bytes using PBKDF2
+func (c *Challenge) DeriveKeyWithLength(size int) ([]byte, error) {
+	c.KeyLen = size
+
 	switch c.PrfName {
 	case "HMAC-SHA256":
 		c.prf = sha256.New
@@ -54,7 +99,18 @@ func (c *Challange) DeriveKey() ([]byte, error) {
 	return c.Dk, nil
 }
 
+// DeriveKey calculates key of default size using PBKDF2
+func (c *Challenge) DeriveKey() ([]byte, error) {
+	length := 32
+	if c.KeyLen == 0 {
+		c.KeyLen = length
+	}
+	return c.DeriveKeyWithLength(c.KeyLen)
+}
+
 func main() {
+	fmt.Println(v1) // our test vector
+
 	rounds := 100000
 	saltLen := 16
 
@@ -69,15 +125,17 @@ func main() {
 	pwdsByKind["four word"] = []string{"divulge clasp resent derelict", "inundate grunt sugar image", "planned cuckoo motor disburse"}
 	pwdsByKind["five word"] = []string{"windburn headrest crepe curdle bodily", "walrus glom armchair mad untried"}
 
-	challenges := make([]Challange, 20)
+	seed, _ := hex.DecodeString("5a463d81675b7373f4b5cc7768213664")
+	drng := NewDPRNG(seed)
+	challenges := make([]Challenge, 20)
 	for kind, pwds := range pwdsByKind {
 		for _, pwd := range pwds {
-			c := Challange{Rounds: rounds, PrfName: "HMAC-SHA256", Hint: kind}
+			c := Challenge{Rounds: rounds, PrfName: "HMAC-SHA256", Hint: kind}
 			if kind == "sample" {
 				c.Hint = fmt.Sprintf("\"%s\"", pwd)
 			}
 			c.Salt = make([]byte, saltLen)
-			_, err := rand.Read(c.Salt)
+			_, err := drng.Read(c.Salt)
 			if err != nil {
 				fmt.Println("error:", err)
 				return
@@ -97,4 +155,45 @@ func main() {
 		}
 	}
 
+}
+
+// DPRNG is our deterministic Pseudo-Random Byte Generator
+type DPRNG struct {
+	block     cipher.Block
+	BlockSize int
+	stream    cipher.Stream
+}
+
+// NewDPRNG sets up a new DPRNG with seed
+func NewDPRNG(seed []byte) *DPRNG {
+	d := new(DPRNG)
+	var err error
+
+	if !(len(seed) == 16 || len(seed) == 24 || len(seed) == 32) {
+		fmt.Println("Seed:", seed)
+		fmt.Println("len:", len(seed))
+		panic("bad seed")
+	}
+	d.block, err = aes.NewCipher(seed)
+	if err != nil {
+		panic(err)
+	}
+
+	d.BlockSize = d.block.BlockSize()
+	// use 0 as iv and plaintext(security is in the seed)
+	iv := make([]byte, d.BlockSize)
+
+	d.stream = cipher.NewOFB(d.block, iv[:])
+
+	return d
+
+}
+
+// Read from the RNG.
+func (d DPRNG) Read(result []byte) (n int, err error) {
+
+	length := len(result)
+	src := make([]byte, length)
+	d.stream.XORKeyStream(result, src)
+	return length, nil
 }

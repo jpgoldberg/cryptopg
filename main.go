@@ -76,10 +76,13 @@ func (c Challenge) String() string {
 
 // String for test vector challenge
 func (t TestVector) String() string {
+	if t.Dk == nil {
+		t.DeriveKey()
+	}
 	r := fmt.Sprintf("Passwd:\t\"%s\"\n", t.Pwd)
 	r += t.Challenge.String()
-	r += fmt.Sprintf("Expected:\t%s\n", t.Expected)
-	r += fmt.Sprintf("Passes?\t%v\n", t.Pass())
+	r += fmt.Sprintf("Expect:\t%s\n", t.Expected)
+	r += fmt.Sprintf("Passes:\t%v\n", t.Pass())
 
 	return r
 }

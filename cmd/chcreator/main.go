@@ -8,8 +8,11 @@ import (
 	"fmt"
 	"hash"
 
+	"github.com/jpgoldberg/opchallenge/dprng"
+
+	"os"
+
 	"golang.org/x/crypto/pbkdf2"
-	// "github.com/jpgoldberg/opchallenge/dprng"
 )
 
 // Challenge has details for each PBKDF2 challenges
@@ -128,7 +131,11 @@ func main() {
 	pwdsByKind["five word"] = []string{"windburn headrest crepe curdle bodily", "walrus glom armchair mad untried"}
 
 	seed, _ := hex.DecodeString("5a463d81675b7373f4b5cc7768213664")
-	drng := NewDPRNG(seed)
+	drng, err := dprng.NewDPRNG(seed)
+	if err != nil {
+		fmt.Fprint(os.Stderr, "Couldn't create RNG: $v\n", err)
+		os.Exit(1)
+	}
 	challenges := make([]Challenge, 20)
 	for kind, pwds := range pwdsByKind {
 		for _, pwd := range pwds {

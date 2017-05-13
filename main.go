@@ -39,14 +39,14 @@ func (t TestVector) Pass() bool {
 	return false
 }
 
-var v1 = TestVector{
+var set5 = TestVector{
 	Challenge: Challenge{
 		Rounds:  4096,
 		KeyLen:  40,
 		Salt:    []byte("saltSALTsaltSALTsaltSALTsaltSALTsalt"),
 		PrfName: "HMAC-SHA256",
 		Pwd:     "passwordPASSWORDpassword",
-		Hint:    "http://stackoverflow.com/a/5136918/1304076",
+		Hint:    "Set 5 https://github.com/ircmaxell/quality-checker/blob/master/tmp/gh_18/PHP-PasswordLib-master/test/Data/Vectors/pbkdf2-draft-josefsson-sha256.test-vectors",
 		prf:     sha256.New,
 		Dk:      nil,
 	},
@@ -112,7 +112,7 @@ func (c *Challenge) DeriveKey() ([]byte, error) {
 }
 
 func main() {
-	fmt.Println(v1) // our test vector
+	fmt.Println(set5) // our test vector
 
 	rounds := 100000
 	saltLen := 16

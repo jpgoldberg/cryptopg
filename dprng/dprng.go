@@ -15,18 +15,16 @@ type DPRNG struct {
 }
 
 // NewDPRNG sets up a new DPRNG with seed
-func NewDPRNG(seed []byte) *DPRNG {
-	d := new(DPRNG)
-	var err error
+// This uses AES in OFB mode to create a stream that just encrypts zeros
+func NewDPRNG(seed []byte) (d *DPRNG, err error) {
+	d = new(DPRNG)
 
 	if !(len(seed) == 16 || len(seed) == 24 || len(seed) == 32) {
-		fmt.Println("Seed:", seed)
-		fmt.Println("len:", len(seed))
-		panic("bad seed")
+		return nil, fmt.Errorf("bad seed length: %d", len(seed))
 	}
 	d.block, err = aes.NewCipher(seed)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
 	d.BlockSize = d.block.BlockSize()
@@ -35,7 +33,7 @@ func NewDPRNG(seed []byte) *DPRNG {
 
 	d.stream = cipher.NewOFB(d.block, iv[:])
 
-	return d
+	return d, nil
 
 }
 

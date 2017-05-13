@@ -9,6 +9,7 @@ import (
 	"hash"
 
 	"golang.org/x/crypto/pbkdf2"
+	// "github.com/jpgoldberg/opchallenge/dprng"
 )
 
 // Challenge has details for each PBKDF2 challenges

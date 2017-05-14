@@ -4,7 +4,7 @@ import (
 	"encoding/hex"
 	"fmt"
 
-	"github.com/jpgoldberg/opchallenge/challenge"
+	"github.com/jpgoldberg/opchallenge/crackme"
 	"github.com/jpgoldberg/opchallenge/dprng"
 
 	"os"
@@ -32,10 +32,10 @@ func main() {
 		fmt.Fprint(os.Stderr, "Couldn't create RNG: $v\n", err)
 		os.Exit(1)
 	}
-	challenges := make([]challenge.Challenge, 20)
+	challenges := make([]crackme.Challenge, 20)
 	for kind, pwds := range pwdsByKind {
 		for _, pwd := range pwds {
-			c := challenge.Challenge{Rounds: rounds, PrfName: "HMAC-SHA256", Hint: kind}
+			c := crackme.Challenge{Rounds: rounds, PrfName: "HMAC-SHA256", Hint: kind}
 			if kind == "sample" {
 				c.Hint = fmt.Sprintf("\"%s\"", pwd)
 			}

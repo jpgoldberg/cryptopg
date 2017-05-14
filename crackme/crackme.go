@@ -1,5 +1,5 @@
-// Package challenge is for creating cracking challenges
-package challenge
+// Package crackme is for creating cracking challenges
+package crackme
 
 import (
 	"bytes"

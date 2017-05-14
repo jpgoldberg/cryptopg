@@ -10,7 +10,7 @@ import (
 // DPRNG is our deterministic Pseudo-Random Byte Generator
 type DPRNG struct {
 	block     cipher.Block
-	BlockSize int
+	blockSize int
 	stream    cipher.Stream
 }
 
@@ -27,9 +27,9 @@ func NewDPRNG(seed []byte) (d *DPRNG, err error) {
 		return nil, err
 	}
 
-	d.BlockSize = d.block.BlockSize()
+	d.blockSize = d.block.BlockSize()
 	// use 0 as iv and plaintext(security is in the seed)
-	iv := make([]byte, d.BlockSize)
+	iv := make([]byte, d.blockSize)
 
 	d.stream = cipher.NewOFB(d.block, iv[:])
 

@@ -4,8 +4,8 @@ import (
 	"encoding/hex"
 	"fmt"
 
-	"github.com/jpgoldberg/opchallenge/crackme"
-	"github.com/jpgoldberg/opchallenge/dprng"
+	"github.com/jpgoldberg/cryptopg/crackme"
+	"github.com/jpgoldberg/cryptopg/dprng"
 
 	"os"
 )

@@ -35,7 +35,7 @@ func main() {
 	challenges := make([]crackme.Challenge, 20)
 	for kind, pwds := range pwdsByKind {
 		for _, pwd := range pwds {
-			c := crackme.Challenge{Rounds: rounds, PrfName: "HMAC-SHA256", Hint: kind}
+			c := crackme.Challenge{Rounds: rounds, PrfName: "HMAC-SHA256", Hint: kind, Pwd: pwd}
 			if kind == "sample" {
 				c.Hint = fmt.Sprintf("\"%s\"", pwd)
 			}

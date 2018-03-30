@@ -35,8 +35,6 @@ Our interest is to understand cracking efforts in terms of the strength of a tes
 2. Sample challenges (some with "answers") published prior to the official challenge.
 3. The KDF we use for these challenges is stripped of many of the idiosyncracies of the 1Password KDF that are not relevant for the difficulty of cracking locally captured data.
 
-The scripts and source data are [we need URLs for these].
-
 Individual challenges will look something like this.
 
 ```
@@ -49,6 +47,9 @@ Individual challenges will look something like this.
     "derived": "3e0f1903cc73b07a7070a661f8450d495cc99151ae67bcdf69a80d0391e7d62f"
 }
 ```
+
+They were generated using
+code in [gentestpwds](./cmd/gentestpwds/) and [chcreator](./cmd/chcreator), the usage of which is described in [docs/README](./docs/README.md).
 
 ## Administration
 

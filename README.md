@@ -25,6 +25,8 @@ This means that the passwords we present here are weaker than we recommend as 1P
 
 At the same time, we want the attempts to take some real effort so that we can get more data on that effort. In any cracking effort, there are some fixed costs of simply setting up the cracking run (preparing the data, configuring the software, etc), we want those costs to be dominated by the actual cracking.
 
+Whether or not the difficulty of the challenges and the prizes set achieve our aims is something we will not know until we run this.
+
 ## How we help the participants
 
 Our interest is to understand cracking efforts in terms of the strength of a test Master Password under the assumption that an attacker fully knows the details of key derivation and password generation scheme. Therefore we try to provide everything a participant will need to know to set up their systems prior to the beginning of the competition. Thus we include
@@ -47,6 +49,7 @@ Individual challenges will look something like this.
     "derived": "3e0f1903cc73b07a7070a661f8450d495cc99151ae67bcdf69a80d0391e7d62f"
 }
 ```
+
 ## Administration
 
 To ensure fair handling of the contest itself and the award of payments, we are asking BugCrowd to administer this. This is a natural choice, as they both have the experience with delivering bounties, and have earned a reputation as a trusted party in dealing both with those offering bounties and those seeking them.
